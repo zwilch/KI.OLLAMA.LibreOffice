@@ -199,7 +199,7 @@ class MainJob(unohelper.Base, XJobExecutor):
         add("btn_ok", "Button", HORI_MARGIN + label_width + HORI_SEP, VERT_MARGIN, 
                 BUTTON_WIDTH, BUTTON_HEIGHT, {"PushButtonType": OK, "DefaultButton": True})
         add("edit_endpoint", "Edit", HORI_MARGIN, LABEL_HEIGHT,
-                WIDTH - HORI_MARGIN * 2, EDIT_HEIGHT, {"Text": str(self.get_config("endpoint","http://127.0.0.1:5000"))})
+                WIDTH - HORI_MARGIN * 2, EDIT_HEIGHT, {"Text": str(self.get_config("endpoint","http://127.0.0.1:11434"))})
         add("label_model", "FixedText", HORI_MARGIN, LABEL_HEIGHT + VERT_MARGIN + VERT_SEP + EDIT_HEIGHT, label_width, LABEL_HEIGHT, 
             {"Label": "Model(Required by Ollama):", "NoLabel": True})
         add("edit_model", "Edit", HORI_MARGIN, LABEL_HEIGHT + VERT_MARGIN + VERT_SEP + EDIT_HEIGHT + VERT_SEP + LABEL_HEIGHT, 
@@ -217,7 +217,7 @@ class MainJob(unohelper.Base, XJobExecutor):
         dialog.setPosSize(_x, _y, 0, 0, POS)
         
         edit_endpoint = dialog.getControl("edit_endpoint")
-        edit_endpoint.setSelection(uno.createUnoStruct("com.sun.star.awt.Selection", 0, len(str(self.get_config("endpoint","http://127.0.0.1:5000")))))
+        edit_endpoint.setSelection(uno.createUnoStruct("com.sun.star.awt.Selection", 0, len(str(self.get_config("endpoint","http://127.0.0.1:11434")))))
         
         edit_model = dialog.getControl("edit_model")
         edit_model.setSelection(uno.createUnoStruct("com.sun.star.awt.Selection", 0, len(str(self.get_config("model","")))))
@@ -254,18 +254,17 @@ class MainJob(unohelper.Base, XJobExecutor):
                 #text_range = selection.getByIndex(0)
                 try:
 
-                    url = self.get_config("endpoint", "http://127.0.0.1:5000") + "/v1/completions" 
+                    url = self.get_config("endpoint", "http://127.0.0.1:11434") + "/v1/completions" 
                     
                     
                     headers = {
                         'Content-Type': 'application/json'
                     }
-                    data = {
+                    data = { # 'max_tokens': 70,
                         'prompt': text_range.getString(),
-                        'max_tokens': 70,
                         'temperature': 1,
                         'top_p': 0.9,
-                        'seed': 10
+                        'seed': .1
                     }
 
                     model = self.get_config("model", "")
@@ -309,12 +308,11 @@ class MainJob(unohelper.Base, XJobExecutor):
                     'Content-Type': 'application/json'
                 }
 
-                data = {
+                data = { #'max_tokens': len(text_range.getString()), 
                     'prompt': "ORIGINAL VERSION:\n" + text_range.getString() + "\n Below is an edited version according to the following instructions. There are no comments in the edited version. The edited version is followed by the end of the document: \n" + user_input + "\nEDITED VERSION:\n",
-                    'max_tokens': len(text_range.getString()),
                     'temperature': 1,
                     'top_p': 0.9,
-                    'seed': 10
+                    'seed': -1
                 }
 
                 model = self.get_config("model", "")
